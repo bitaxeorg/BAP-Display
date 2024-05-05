@@ -1,0 +1,10 @@
+.idea/
+.pio
+.vscode
+.vs
+*.sln
+*.vcxproj*
+NerdMinerLog.txt
+bin/*
+logs
+boards/ESP32_wroom_guide.md
