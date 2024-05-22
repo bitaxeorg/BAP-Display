@@ -131,7 +131,7 @@
 //#include <User_Setups/Setup204_ESP32_TouchDown.h>     // Setup file for the ESP32 TouchDown based on ILI9488 480 x 320 TFT 
 
 //#include <User_Setups/Setup205_ESP32_TouchDown_S3.h>     // Setup file for the ESP32 TouchDown S3 based on ILI9488 480 x 320 TFT 
-#ifdef NERDMINERV2
+#ifdef BAPDISPLAY19
 #include <User_Setups/Setup206_LilyGo_T_Display_S3.h>
 #endif
 #ifdef NERMINER_S3_AMOLED

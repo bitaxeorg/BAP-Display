@@ -14,6 +14,8 @@
 #include "drivers/displays/display.h"
 
 #include "timeconst.h"
+#include "drivers/devices/BAP.h"
+#include <SPIFFS.h>
 
 //3 seconds WDT
 #define WDT_TIMEOUT 3
@@ -29,7 +31,6 @@
 #endif
 
 extern monitor_data mMonitor;
-
 
 
 /**********************⚡ GLOBAL Vars *******************************/
@@ -62,56 +63,39 @@ void setup()
   disableCore0WDT();
   //disableCore1WDT();
 
-  // Setup the buttons
-  #if defined(PIN_BUTTON_1) && !defined(PIN_BUTTON_2) //One button device
-    button1.setPressMs(5*SECOND_MS);
-    button1.attachClick(switchToNextScreen);
-    button1.attachDoubleClick(alternateScreenRotation);
-    button1.attachLongPressStart(reset_configuration);
-    button1.attachMultiClick(alternateScreenState);
-  #endif
-
-  #if defined(PIN_BUTTON_1) && defined(PIN_BUTTON_2) //Button 1 of two button device
-    button1.setPressMs(5*SECOND_MS);
-    button1.attachClick(alternateScreenState);
-    button1.attachDoubleClick(alternateScreenRotation);
-  #endif
-
-  #if defined(PIN_BUTTON_2) //Button 2 of two button device
-    button2.setPressMs(5*SECOND_MS);
-    button2.attachClick(switchToNextScreen);
-    button2.attachLongPressStart(reset_configuration);
-  #endif
-
   /******** INIT NERDMINER ************/
   Serial.println("NerdMiner v2 starting......");
 
+  SPIFFS.begin(true);
+
   /******** INIT DISPLAY ************/
   initDisplay();
+  Serial.println("Setup......");
+  drawSetupScreen();
+  //drawLoadingScreen();
+  TaskHandle_t displayTask = NULL;
+  xTaskCreate(BAP_test, "BAP", 6000, (void*)1, 1, &displayTask);
   
   /******** PRINT INIT SCREEN *****/
   // drawLoadingScreen();
-  // delay(2*SECOND_MS);
+  // 
 
   /******** SHOW LED INIT STATUS (devices without screen) *****/
-  mMonitor.NerdStatus = NM_waitingConfig;
-  doLedStuff(0);
-  
-  /******** INIT WIFI ************/
-  init_WifiManager();
+  //mMonitor.NerdStatus = NM_waitingConfig;
+
 
   /******** CREATE TASK TO PRINT SCREEN *****/
   //tft.pushImage(0, 0, MinerWidth, MinerHeight, MinerScreen);
   // Higher prio monitor task
-  Serial.println("");
-  Serial.println("Initiating tasks...");
-  char *name = (char*) malloc(32);
-  sprintf(name, "(%s)", "Monitor");
-  BaseType_t res1 = xTaskCreatePinnedToCore(runMonitor, "Monitor", 10000, (void*)name, 4, NULL,1);
+  // Serial.println("");
+  // Serial.println("Initiating tasks...");
+  // char *name = (char*) malloc(32);
+  // sprintf(name, "(%s)", "Monitor");
+  // BaseType_t res1 = xTaskCreatePinnedToCore(runMonitor, "Monitor", 10000, (void*)name, 4, NULL,1);
 
-  /******** CREATE STRATUM TASK *****/
-  sprintf(name, "(%s)", "Stratum");
-  BaseType_t res2 = xTaskCreatePinnedToCore(runStratumWorker, "Stratum", 15000, (void*)name, 3, NULL,1);
+  // /******** CREATE STRATUM TASK *****/
+  // sprintf(name, "(%s)", "Stratum");
+  // BaseType_t res2 = xTaskCreatePinnedToCore(runStratumWorker, "Stratum", 15000, (void*)name, 3, NULL,1);
 
 
   /******** CREATE MINER TASKS *****/
@@ -121,15 +105,15 @@ void setup()
 
   // Start mining tasks
   //BaseType_t res = xTaskCreate(runWorker, name, 35000, (void*)name, 1, NULL);
-  TaskHandle_t minerTask1, minerTask2 = NULL;
-  xTaskCreate(runMiner, "Miner0", 6000, (void*)0, 1, &minerTask1);
-  xTaskCreate(runMiner, "Miner1", 6000, (void*)1, 1, &minerTask2);
+  // TaskHandle_t minerTask1, minerTask2 = NULL;
+  // xTaskCreate(runMiner, "Miner0", 6000, (void*)0, 1, &minerTask1);
+  // xTaskCreate(runMiner, "Miner1", 6000, (void*)1, 1, &minerTask2);
  
-  esp_task_wdt_add(minerTask1);
-  esp_task_wdt_add(minerTask2);
+  // esp_task_wdt_add(minerTask1);
+  // esp_task_wdt_add(minerTask2);
 
   /******** MONITOR SETUP *****/
-  setup_monitor();
+//  setup_monitor();
 }
 
 void app_error_fault_handler(void *arg) {

@@ -1,8 +1,8 @@
 #ifndef __DEVICE_H__
 #define __DEVICE_H__
 
-#if defined(NERDMINERV2)
-#include "nerdMinerV2.h"
+#if defined(BAPDISPLAY19)
+#include "bitaxeDisplay-1-9.h"
 
 #else
 #error "No device defined"

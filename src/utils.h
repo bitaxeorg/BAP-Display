@@ -13,7 +13,7 @@
 #define	bswap32(x)	__bswap32(x)
 #define	bswap64(x)	__bswap64(x)
 
-
+#define CRC5_MASK 0x1F
 
 uint8_t hex(char ch);
 
@@ -23,7 +23,7 @@ double diff_from_target(void *target);
 miner_data calculateMiningData(mining_subscribe& mWorker, mining_job mJob);
 bool checkValid(unsigned char* hash, unsigned char* target);
 void suffix_string(double val, char *buf, size_t bufsiz, int sigdigits);
-
+uint8_t crc5(uint8_t *data, uint8_t len);
 
 
 #endif // UTILS_API_H

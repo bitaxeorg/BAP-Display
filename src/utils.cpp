@@ -455,3 +455,53 @@ void suffix_string(double val, char *buf, size_t bufsiz, int sigdigits)
 		snprintf(buf, bufsiz, "%*.*f%s", sigdigits + 1, ndigits, dval, suffix);
 	}
 }
+
+/* compute crc5 over given number of bytes */
+// adapted from https://mightydevices.com/index.php/2018/02/reverse-engineering-antminer-s1/
+uint8_t crc5(uint8_t *data, uint8_t len)
+{
+	uint8_t i, j, k, index = 0;
+	uint8_t crc = CRC5_MASK;
+	/* registers */
+	uint8_t crcin[5] = {1, 1, 1, 1, 1};
+	uint8_t crcout[5] = {1, 1, 1, 1, 1};
+	uint8_t din = 0;
+
+	len *= 8;
+
+	/* push data bits */
+	for (j = 0x80, k = 0, i = 0; i < len; i++)
+	{
+		/* input bit */
+		din = (data[index] & j) != 0;
+		/* shift register */
+		crcout[0] = crcin[4] ^ din;
+		crcout[1] = crcin[0];
+		crcout[2] = crcin[1] ^ crcin[4] ^ din;
+		crcout[3] = crcin[2];
+		crcout[4] = crcin[3];
+		/* next bit */
+		j >>= 1, k++;
+		/* next byte */
+		if (k == 8)
+			j = 0x80, k = 0, index++;
+		/* apply new shift register value */
+		memcpy(crcin, crcout, 5);
+		// crcin = crcout[0];
+	}
+
+	crc = 0;
+	/* extract bitmask from register */
+	if (crcin[4])
+		crc |= 0x10;
+	if (crcin[3])
+		crc |= 0x08;
+	if (crcin[2])
+		crc |= 0x04;
+	if (crcin[1])
+		crc |= 0x02;
+	if (crcin[0])
+		crc |= 0x01;
+
+	return crc;
+}

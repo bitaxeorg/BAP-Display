@@ -15,5 +15,5 @@ void drawSetupScreen();
 void drawCurrentScreen(unsigned long mElapsed);
 void animateCurrentScreen(unsigned long frame);
 void doLedStuff(unsigned long frame);
-
+void tDisplay_UpdateHashrate(double hashrate);
 #endif // DISPLAY_H

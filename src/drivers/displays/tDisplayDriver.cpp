@@ -11,6 +11,7 @@
 #include "OpenFontRender.h"
 #include "rotation.h"
 #include <SPIFFS.h>
+#include <string>
 
 #define BMP_HEADER_SIZE 54 + 16// BMP header size in bytes
 #define WIDTH 340
@@ -36,11 +37,13 @@ void tDisplay_Init(void)
 
   // Load the font and check it can be read OK
   // if (render.loadFont(NotoSans_Bold, sizeof(NotoSans_Bold))) {
-  if (render.loadFont(DigitalNumbers, sizeof(DigitalNumbers)))
+  if (render.loadFont(NotoSans_Bold, sizeof(NotoSans_Bold)))
   {
     Serial.println("Initialise error");
     return;
   }
+
+  tft.fillScreen(TFT_WHITE);
 }
 
 void tDisplay_AlternateScreenState(void)
@@ -243,6 +246,22 @@ void tDisplay_BTCprice(unsigned long mElapsed)
 
   // Push prepared background to screen
   background.pushSprite(0, 0);
+}
+
+void tDisplay_UpdateHashrate(double hashrate) {
+    // Convert hashrate to string
+    std::string hashrateString = std::to_string((int)hashrate) + " Gh/s";
+    // Get pointer to string data
+    const char* cstr = hashrateString.c_str();
+
+    Serial.println(cstr);
+    background.fillScreen(TFT_BLACK);
+    // Hashrate
+    render.setFontSize(25);
+    render.setCursor(19, 20);
+    render.setFontColor(TFT_BLACK);
+    render.drawString(cstr, 100, 85, TFT_RED);
+    background.pushSprite(0, 0);
 }
 
 void tDisplay_LoadingScreen(void)
